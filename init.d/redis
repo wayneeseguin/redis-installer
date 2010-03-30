@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#
+# Author:  Wayne E. Seguin <wayneeseguin@gmail.com>
+# License: The same licence as Redis, New BSD
+#          http://www.opensource.org/licenses/bsd-license.php
+#
+
+# Source the system config file, if it exists.
+if [[ -s /etc/conf.d/redis ]] ; then
+  source /etc/conf.d/redis
+fi
+
+# Default config variables that have not been set.
+port="${port:-6379}"
+prefix="${prefix:-/usr/local}"
+redis="$prefix/bin/redis-server"
+pidfile="${pidfile:-/var/run/redis/redis.pid}"
+config="${config:-/etc/redis/redis.conf}"
+user="${user:-redis}"
+
+#
+# Set the running $pid value based on $pidfile.
+#
+if [[ -s "$pidfile" ]] ; then
+  pid=$(cat $pidfile)
+else
+  rm -f $pidfile
+fi
+
+#
+# Start redis using redis-server as user 'redis'.
+#
+start() {
+  if [[ -f $pidfile ]] ; then
+    #
+    # TODO: Extend this to do a double-check to ensure the process
+    #       is not already running and the pidfile has simply been blown away.
+    #
+    echo -n "$pidfile exists, redis-server is either already running or crashed.\n"
+    exit 1
+  else
+    echo -n "Starting Redis server...\n"
+    su redis -c "$redis $config"
+    exit 0
+  fi
+}
+
+#
+# Stop redis using redis-cli SHUTDOWN.
+#
+stop() {
+  if [[ ! -f $pidfile ]] ; then
+    #
+    # TODO: Extend this to do a double-check to ensure the process
+    #       is not running and the pidfile has simply been blown away.
+    #
+    echo -n "$pidfile does not exist, process is not running\n"
+    exit 1
+  else
+    echo -n "Stopping redis server ...\n"
+    redis-cli -p ${port} SHUTDOWN
+
+    # Keep user informed while server shuts down.
+    echo "Waiting for the redis server to shutdown "
+    while [[ -x /proc/${pid} ]] ; do
+      echo -n '.' ; sleep 1
+    done
+
+    # Clear out the old pidfile.
+    rm -f $pidfile
+
+    # Notify user of successful completion.
+    echo "redis server stopped."
+    exit 0
+  fi
+}
+
+usage() {
+  echo -e "Usage: $0 {start,stop}"
+  exit 1
+}
+
+#
+# CLI logic.
+#
+case "$1" in
+  start) start_redis ;;
+  stop)  stop_redis  ;;
+  *)     usage       ;;
+esac

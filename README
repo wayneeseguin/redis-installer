@@ -1,0 +1,35 @@
+Author:  Wayne E. Seguin <wayneeseguin@gmail.com>
+License: See LICENSE file.
+
+This redis-installer project bootstraps Redis in two scenarios.
+
+Scenario 1.
+
+Installing as a single user
+
+  $ ./bin/install-redis
+
+  * As root on localhost (bin/install-redis) this will:
+
+    - Install redis-server and redis-cli to /usr/local/bin/
+
+    - Ensure that redis related directories exist,
+
+      /etc/redis /var/log/redis /var/run/redis /data/redis
+
+  * As a regular user (great for development) this will:
+
+    - Install redis-server and redis-cli to $HOME/bin/
+
+    - Ensure that redis related directories exist,
+
+      $HOME/.redis/log $HOME/.redis/data $HOME/.redis/pids
+
+Scenario 2.
+
+Any number of remote hosts (bin/install-redis-on-hosts)
+
+  $ ./bin/install-redis-on-hosts root@host1 root@host2
+
+This will Install redis system wide on the remote hosts.
+

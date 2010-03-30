@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Author:  Wayne E. Seguin <wayneeseguin@gmail.com>
+# License: The same licence as Redis, New BSD
+#          http://www.opensource.org/licenses/bsd-license.php
+#
+hosts="$*"
+timeout="5"
+export port="${port:-6379}"
+
+if [[ -z "$hosts" ]] ; then
+  echo "Hosts to sync to must be specified as command line parameters."
+  echo -e "Usage: $0 host1 host2 ..."
+  exit 1
+fi
+
+for host in $hosts ; do
+  ssh -q -q -o "BatchMode=yes" -o "ConnectTimeout ${timeout}" ${user}@${host} "echo 2>&1" && return 0
+  if [[ $? -gt 0 ]] ; then
+    echo -e "\nERROR: Could not connect to ${host}, skipping. \nPlease ensure sure you have access to ${host} and then retry."
+    exit 1
+  fi
+
+  echo -e "Uploading install-redis script to $host"
+  scp bin/install-redis $host:/usr/local/src/
+
+  echo -e "Making install-redis script executable on ${host}."
+  ssh $host 'cd /usr/local/src/ ; chmod +x ./install-redis ; ./install-redis'
+
+  echo -e "Uploading default configuration script to ${host}."
+  scp conf/redis.conf $host:/etc/redis/redis.conf
+
+  #
+  # TODO: Account for rc.d based systems.
+  #
+  echo -e "Uploading redis init.d script to ${host}."
+  scp init.d/redis $host:/etc/init.d/redis
+
+  echo -e "Making /etc/init.d/redis executable on ${host}."
+  ssh $host 'chmod +x /etc/init.d/redis'
+done
+
