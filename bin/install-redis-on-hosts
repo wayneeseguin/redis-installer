@@ -30,13 +30,9 @@ for host in $hosts ; do
   echo -e "Uploading default configuration script to ${host}."
   scp conf/redis.conf $host:/etc/redis/redis.conf
 
-  #
-  # TODO: Account for rc.d based systems.
-  #
-  echo -e "Uploading redis init.d script to ${host}."
-  scp init.d/redis $host:/etc/init.d/redis
-
-  echo -e "Making /etc/init.d/redis executable on ${host}."
-  ssh $host 'chmod +x /etc/init.d/redis'
+  echo -e "Installing redis init script on ${host}."
+  scp init.d/redis $host:redis.init
+  ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'/etc/init.d/redis
 done
 
+exit 0
