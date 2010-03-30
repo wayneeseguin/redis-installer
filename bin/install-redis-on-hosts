@@ -6,6 +6,7 @@
 #
 hosts="$*"
 timeout="5"
+user="root"
 export port="${port:-6379}"
 
 if [[ -z "$hosts" ]] ; then
@@ -15,7 +16,8 @@ if [[ -z "$hosts" ]] ; then
 fi
 
 for host in $hosts ; do
-  ssh -q -q -o "BatchMode=yes" -o "ConnectTimeout ${timeout}" ${user}@${host} "echo 2>&1" && return 0
+  if ! echo "$host" | awk '/@/' ; then host="${user}@${host}" ; fi
+  ssh -o "BatchMode=yes" -o "ConnectTimeout ${timeout}" ${user}@${host} 'hostname'
   if [[ $? -gt 0 ]] ; then
     echo -e "\nERROR: Could not connect to ${host}, skipping. \nPlease ensure sure you have access to ${host} and then retry."
     exit 1
@@ -31,8 +33,8 @@ for host in $hosts ; do
   scp conf/redis.conf $host:/etc/redis/redis.conf
 
   echo -e "Installing redis init script on ${host}."
-  scp init.d/redis $host:redis.init
-  ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'/etc/init.d/redis
+  scp init.d/redis $host:redis_ctl
+  ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'
 done
 
 exit 0
