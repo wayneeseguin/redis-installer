@@ -16,14 +16,14 @@ usage() {
 #
 while true ; do
   case "$1" in
-    -h|--help|-\?) usage  ; exit 0    ;;
-    --verbose)     verbose=1 ; shift  ;;
-    --trace)       set -x ; shift     ;;
-    --version)     version=$1 ; shift ;;
-    --prefix)      prefix=$1 ; shift ;;
-    --)            shift ; break      ;;
+    -h|--help|-\?) usage      ; exit 0 ;;
+    --verbose)     verbose=1  ; shift  ;;
+    --trace)       set -x     ; shift  ;;
+    --version)     version=$1 ; shift  ;;
+    --prefix)      prefix=$1  ; shift  ;;
+    --)            shift      ; break  ;;
     -*)            echo "invalid option: $1" 1>&2 ; usage ; exit 1;;
-    *)             break ;;
+    *)             break               ;;
   esac
 done
 
@@ -82,7 +82,7 @@ cd ${package}-${version}
 echo -e "Compiling ${package} ${version} ..."
 make
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version}.${archive_format} failed to compile."
+  echo -e "ERROR: ${package}-${version} failed to compile."
   exit 1
 fi
 
@@ -92,7 +92,7 @@ fi
 echo -e "Installing ${package} ${version} ..."
 cp -f redis-server ${install_path}/bin/ && cp redis-cli ${install_path}/bin/
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version}.${archive_format} failed to install."
+  echo -e "ERROR: ${package}-${version} failed to install."
   exit 1
 fi
 
