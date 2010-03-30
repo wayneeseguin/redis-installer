@@ -39,27 +39,75 @@ result=0
 # Alternate configuration based on root/user install.
 if [[ "root"  = "$(whoami)" ]] ; then
   prefix="${prefix:-/usr/local}"
-  install_path="$prefix"
-  source_path="$prefix/src"
-  useradd -r redis 2>/dev/null # If the user already exists we don't want to hear about it.
-  directories="/etc/redis /var/log/redis /var/run/redis /data/redis"
-  user="redis"
+  redis_path="${redis_path:-"${prefix}/redis"}"
+  bin_path="${bin_path:-"${prefix}/bin"}"
+  config_path="${config_path:-"/etc/redis"}"
+  log_path="${log_path:-"/var/log/redis"}"
+  pid_path="${pid_path:-"/var/run/redis"}"
+  data_path="${data_path:-"/var/data/redis"}"
+  source_path="${source_path:-"$prefix/src"}"
+  user="${user:-"redis"}"
+  environment="${environment:-production}"
+  useradd -r ${user} 2>/dev/null # If the user already exists we don't want to hear about it.
 else
-  prefix="${prefix:-$HOME}"
-  install_path="$prefix"
-  source_path="$prefix/.src"
-  directories="$HOME/.redis/log $HOME/.redis/data $HOME/.redis/pids"
+  prefix="${prefix:-"$HOME"}"
+  redis_path="${redis_path:-"${prefix}/.redis"}"
+  bin_path="${bin_path:-"${prefix}/bin"}"
+  config_path="${config_path:-"$prefix/.redis/config"}"
+  log_path="${log_path:-"$prefix/.redis/log"}"
+  pid_path="${pid_path:-"$prefix/.redis/run"}"
+  data_path="${data_path:-"$prefix/.redis/data"}"
+  source_path="${source_path:-"$prefix/.src"}"
   user="$(whoami)"
+  environment="${environment:-development}"
+  temlpate="user"
 fi
 
-# Ensure that the source path exists, then switch to it to work out of.
-mkdir -p $source_path && cd $source_path
+appendfsync="${appendfsync:-everysec}"
+port="${port:-6379}"
+pidfile="${pidfile:-"redis.pid"}"
+logfile="${logfile:-"redis.log"}"
+dbfile="${dbfile:-"redis.rdb"}"
+timeout="${timeout:-300}"
+databases="${databases:-24}"
+if [[ "production" = "${environment}" ]] || [[ "staging" = "${environment}" ]] ; then
+  appendonly="${appendonly:-yes}"
+  loglevel="${loglevel:-notice}"
+  daemonize="${daemonize:-yes}"
+else
+  appendonly="${appendonly:-no}"
+  loglevel="${loglevel:-debug}"
+  daemonize="${daemonize:-yes}"
+fi
+
+config_template="${config_template:-"${source_path}/${package}-${version}/redis.conf"}"
+
+#
+# Ensure that redis related directories exist.
+#
+echo -e "Creating directories ${package} ${version} ..."
+if [[ "$result" -eq 0 ]] ; then
+
+  # Directories that must exist.
+  for directory in "${redis_path}" "${config_path}" "${log_path}" "${pid_path}" "${data_path}" "${bin_path}" "${source_path}" ; do
+    mkdir -p "${directory}"
+  done
+
+  # Directories that $user must own.
+  for directory in "${redis_path}" "${config_path}" "${log_path}" "${pid_path}" "${data_path}" ; do
+    chown -R "${user}" "${directory}"
+  done
+
+fi
+
+# Switch to it to work out of the $source_path.
+cd $source_path
 
 #
 # Fetch the Redis tarball
 #
 echo -e "Downloading  ${package}-${version}.${archive_format} ..."
-curl -O -L http://redis.googlecode.com/files/${package}-${version}.${archive_format}
+curl -O -L "http://redis.googlecode.com/files/${package}-${version}.${archive_format}"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
   echo -e "ERROR: ${package}-${version}.${archive_format} failed to download."
   exit 1
@@ -69,12 +117,14 @@ fi
 # Extract the Redis tarball
 #
 echo -e "Extracting ${package} ${version} ..."
-tar zxf ${package}-${version}.${archive_format}
+tar zxf "${package}-${version}.${archive_format}"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
   echo -e "ERROR: ${package}-${version}.${archive_format} failed to extract."
   exit 1
 fi
-cd ${package}-${version}
+
+# Switch into the extracted redis source directory.
+cd "${package}-${version}"
 
 #
 # Compile redis-server, redis-cli
@@ -90,21 +140,33 @@ fi
 # Install redis-server, redis-cli to $prefix
 #
 echo -e "Installing ${package} ${version} ..."
-cp -f redis-server ${install_path}/bin/ && cp redis-cli ${install_path}/bin/
+cp -f redis-server "${bin_path}/" && cp redis-cli "${bin_path}/"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
   echo -e "ERROR: ${package}-${version} failed to install."
   exit 1
 fi
 
 #
-# Ensure that redis related directories exist.
+# Configure, if necessary.
 #
-echo -e "Creating directories ${package} ${version} ..."
-if [[ "$result" -eq 0 ]] ; then
-  for directory in $directories ; do
-    mkdir -p $directory
-    chown -R $user $directory
-  done
+if [[ ! -s "${config_path}/redis.conf" ]] ; then
+  if [[ -s "${config_template}" ]] ; then
+    # Filter sample config file into actual config file using defaults/settings.
+    sed -e 's#/var/run#'"${pid_path}"'#g'  \
+        -e 's#^daemonize .*$#daemonize '"${daemonize}"'#g'  \
+        -e 's#^port .*$#port '"${port}"'#g'  \
+        -e 's#^appendfsync .*$#appendfsync '"${appendfsync}"'#g'  \
+        -e 's#^timeout .*$#timeout '"${timeout}"'#g'  \
+        -e 's#^databases .*$#databases '"${databases}"'#g'  \
+        -e 's#^loglevel .*$#loglevel '"${loglevel}"'#g'  \
+        -e 's#^appendonly .*$#appendonly '"${appendonly}"'#g'  \
+        -e 's#^pidfile .*$#pidfile '"${pid_path}/${pidfile}"'#g'  \
+        -e 's#^logfile .*$#logfile '"${log_path}/${logfile}"'#g'  \
+        -e 's#^dbfilename .*$#dbfilename '"${data_path}/${dbfile}"'#g'\
+        -e 's#^dir .*$#dir '"${data_path}/"'#g'\
+        "${config_template}" \
+      > "${config_path}/redis.conf"
+  fi
 fi
 
 exit $result

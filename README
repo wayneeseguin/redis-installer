@@ -7,7 +7,7 @@ Scenario 1.
 
 Installing as a single user
 
-  $ ./bin/install-redis
+  ∴ ./bin/install-redis
 
   * As root on localhost (bin/install-redis) this will:
 
@@ -17,19 +17,37 @@ Installing as a single user
 
       /etc/redis /var/log/redis /var/run/redis /data/redis
 
+
+    After root installation you can control redis like so:
+
+      ∴ /etc/init.d/redis start # /etc/rc.d on systems like ArchLinux
+
+      ∴ /etc/init.d/redis stop  # /etc/rc.d on systems like ArchLinux
+
   * As a regular user (great for development) this will:
 
     - Install redis-server and redis-cli to $HOME/bin/
 
     - Ensure that redis related directories exist,
 
-      $HOME/.redis/log $HOME/.redis/data $HOME/.redis/pids
+      $HOME/.redis/log $HOME/.redis/run $HOME/.redis/data $HOME/.redis/pids $HOME/bin
+
+
+    After installing as a user, you can start redis like this:
+
+      ∴ ~/bin/redis-server ~/.redis/config/redis.conf
+
+    And then stop redis like this:
+
+      ∴ ~/bin/redis-cli SHUTDOWN
+
+    NOTE: This will improve 'soon' :)
 
 Scenario 2.
 
 Any number of remote hosts (bin/install-redis-on-hosts)
 
-  $ ./bin/install-redis-on-hosts root@host1 root@host2
+  ∴ ./bin/install-redis-on-hosts root@host1 root@host2
 
-This will Install redis system wide on the remote hosts.
+This will Install redis system wide on the remote hosts specified.
 

@@ -29,9 +29,6 @@ for host in $hosts ; do
   echo -e "Making install-redis script executable on ${host}."
   ssh $host 'cd /usr/local/src/ ; chmod +x ./install-redis ; ./install-redis'
 
-  echo -e "Uploading default configuration script to ${host}."
-  scp conf/redis.conf $host:/etc/redis/redis.conf
-
   echo -e "Installing redis init script on ${host}."
   scp init.d/redis $host:redis_ctl
   ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'
