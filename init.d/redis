@@ -30,7 +30,7 @@ fi
 #
 # Start redis using redis-server as user 'redis'.
 #
-start() {
+start_redis() {
   if [[ -f $pidfile ]] ; then
     #
     # TODO: Extend this to do a double-check to ensure the process
@@ -48,7 +48,7 @@ start() {
 #
 # Stop redis using redis-cli SHUTDOWN.
 #
-stop() {
+stop_redis() {
   if [[ ! -f $pidfile ]] ; then
     #
     # TODO: Extend this to do a double-check to ensure the process
