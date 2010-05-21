@@ -6,6 +6,8 @@
 #
 default_redis_version=1.2.6
 
+# redis-2.0.0-rc1
+
 # Emit usage information to the user.
 usage() {
   echo -e "$0 [--version $default_redis_version] [--prefix /usr/local]"
@@ -19,8 +21,8 @@ while true ; do
     -h|--help|-\?) usage      ; exit 0 ;;
     --verbose)     verbose=1  ; shift  ;;
     --trace)       set -x     ; shift  ;;
-    --version)     version=$1 ; shift  ;;
-    --prefix)      prefix=$1  ; shift  ;;
+    --version)     version=$2 ; shift ; shift ;;
+    --prefix)      prefix=$2  ; shift ; shift ;;
     --)            shift      ; break  ;;
     -*)            echo "invalid option: $1" 1>&2 ; usage ; exit 1;;
     *)             break               ;;
