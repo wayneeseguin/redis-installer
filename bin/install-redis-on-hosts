@@ -10,8 +10,10 @@ user="root"
 export port="${port:-6379}"
 
 if [[ -z "$hosts" ]] ; then
-  echo "Hosts to sync to must be specified as command line parameters."
-  echo -e "Usage: $0 host1 host2 ..."
+  printf "
+  A list of hosts must be specified as command line parameters.
+  Usage: $0 [root@]host1 [root@]host2 ...
+  "
   exit 1
 fi
 
@@ -19,17 +21,17 @@ for host in $hosts ; do
   if ! echo "$host" | awk '/@/' ; then host="${user}@${host}" ; fi
   ssh -o "BatchMode=yes" -o "ConnectTimeout ${timeout}" ${user}@${host} 'hostname'
   if [[ $? -gt 0 ]] ; then
-    echo -e "\nERROR: Could not connect to ${host}, skipping. \nPlease ensure sure you have access to ${host} and then retry."
+    printf "\nERROR: Could not connect to ${host}, skipping. \nPlease ensure sure you have access to ${host} and then retry."
     exit 1
   fi
 
-  echo -e "Uploading install-redis script to $host"
+  printf "\nUploading install-redis script to $host\n"
   scp bin/install-redis $host:/usr/local/src/
 
-  echo -e "Making install-redis script executable on ${host}."
+  printf "\nMaking install-redis script executable on ${host}.\n"
   ssh $host 'cd /usr/local/src/ ; chmod +x ./install-redis ; ./install-redis'
 
-  echo -e "Installing redis init script on ${host}."
+  printf "\nInstalling redis init script on ${host}.\n"
   scp init.d/redis $host:redis_ctl
   ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'
 done

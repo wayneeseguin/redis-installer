@@ -4,13 +4,11 @@
 # License: The same licence as Redis, New BSD
 #          http://www.opensource.org/licenses/bsd-license.php
 #
-default_redis_version=1.2.6
-
-# redis-2.0.0-rc1
+default_redis_version=1.2.6 # 2.0.0-rc4
 
 # Emit usage information to the user.
 usage() {
-  echo -e "$0 [--version $default_redis_version] [--prefix /usr/local]"
+  printf "\n$0 [--version $default_redis_version] [--prefix /usr/local]\n"
 }
 
 #
@@ -18,14 +16,15 @@ usage() {
 #
 while true ; do
   case "$1" in
-    -h|--help|-\?) usage      ; exit 0 ;;
-    --verbose)     verbose=1  ; shift  ;;
-    --trace)       set -x     ; shift  ;;
-    --version)     version=$2 ; shift ; shift ;;
-    --prefix)      prefix=$2  ; shift ; shift ;;
-    --)            shift      ; break  ;;
+    -h|--help|-\?) usage               ; exit 0        ;;
+    --verbose)     verbose=1           ; shift         ;;
+    --trace)       set -x              ; shift         ;;
+    --pre)         version="2.0.0-rc4" ; shift         ;;
+    --)            shift               ; break         ;;
+    --version)     version=$2          ; shift ; shift ;;
+    --prefix)      prefix=$2           ; shift ; shift ;;
     -*)            echo "invalid option: $1" 1>&2 ; usage ; exit 1;;
-    *)             break               ;;
+    *)             break                               ;;
   esac
 done
 
@@ -87,7 +86,7 @@ config_template="${config_template:-"${source_path}/${package}-${version}/redis.
 #
 # Ensure that redis related directories exist.
 #
-echo -e "Creating directories ${package} ${version} ..."
+printf "\nCreating directories ${package} ${version} ...\n"
 if [[ "$result" -eq 0 ]] ; then
 
   # Directories that must exist.
@@ -108,20 +107,20 @@ cd $source_path
 #
 # Fetch the Redis tarball
 #
-echo -e "Downloading  ${package}-${version}.${archive_format} ..."
+printf "\nDownloading  ${package}-${version}.${archive_format} ...\n"
 curl -O -L "http://redis.googlecode.com/files/${package}-${version}.${archive_format}"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version}.${archive_format} failed to download."
+  printf "\nERROR: ${package}-${version}.${archive_format} failed to download.\n"
   exit 1
 fi
 
 #
 # Extract the Redis tarball
 #
-echo -e "Extracting ${package} ${version} ..."
+printf "\nExtracting ${package} ${version} ...\n"
 tar zxf "${package}-${version}.${archive_format}"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version}.${archive_format} failed to extract."
+  printf "\nERROR: ${package}-${version}.${archive_format} failed to extract.\n"
   exit 1
 fi
 
@@ -131,20 +130,20 @@ cd "${package}-${version}"
 #
 # Compile redis-server, redis-cli
 #
-echo -e "Compiling ${package} ${version} ..."
+printf "\nCompiling ${package} ${version} ...\n"
 make
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version} failed to compile."
+  printf "\nERROR: ${package}-${version} failed to compile.\n"
   exit 1
 fi
 
 #
 # Install redis-server, redis-cli to $prefix
 #
-echo -e "Installing ${package} ${version} ..."
+printf "\nInstalling ${package} ${version} ...\n"
 cp -f redis-server "${bin_path}/" && cp redis-cli "${bin_path}/"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
-  echo -e "ERROR: ${package}-${version} failed to install."
+  printf "\nERROR: ${package}-${version} failed to install.\n"
   exit 1
 fi
 
