@@ -73,7 +73,7 @@ redis_stop() {
       echo -n '.' ; sleep 1
     done
   else # Darwin, etc...
-    while [[ ! -z "$(ps auxww | grep [r]edis | grep "$config")" ]] ; do
+    while [[ ! -z "$(ps auxww | grep [r]edis | grep "$config" | awk '{print $2}')" ]] ; do
       echo -n '.' ; sleep 1
     done
   fi
