@@ -31,13 +31,13 @@ fi
 if [[ "Linux" = "$(uname)" ]] ; then
   # /proc does not exist on say, Darwin
   if [[ ! -z "${pid}" ]] && [[ ! -x "/proc/${pid}" ]] ;then
-    pid="$(ps auxww | grep [r]edis | grep "$config")"
+    pid="$(ps auxww | grep [r]edis | grep "$config" | awk '{print $2}')"
   elif [[ -z "${pid}" ]] ; then
-    pid="$(ps auxww | grep [r]edis | grep "$config")"
+    pid="$(ps auxww | grep [r]edis | grep "$config" | awk '{print $2}')"
   fi
 else
   if [[ -z "${pid}" ]] ; then
-    pid="$(ps auxww | grep [r]edis | grep "$config")"
+    pid="$(ps auxww | grep [r]edis | grep "$config" | awk '{print $2}')"
   fi
 fi
 
