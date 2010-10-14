@@ -49,6 +49,7 @@ if [[ "root"  = "$(whoami)" ]] ; then
   source_path="${source_path:-"$prefix/src"}"
   user="${user:-"redis"}"
   environment="${environment:-production}"
+  init_d="${init_d:-"/etc/init.d"}"
   useradd -r ${user} 2>/dev/null # If the user already exists we don't want to hear about it.
 else
   prefix="${prefix:-"$HOME"}"
@@ -82,6 +83,7 @@ else
 fi
 
 config_template="${config_template:-"${source_path}/${package}-${version}/redis.conf"}"
+current_dir=`pwd`
 
 #
 # Ensure that redis related directories exist.
@@ -145,6 +147,26 @@ cp -f redis-server "${bin_path}/" && cp redis-cli "${bin_path}/"
 result=$? ; if [[ "$result" -gt 0 ]] ; then
   printf "\nERROR: ${package}-${version} failed to install.\n"
   exit 1
+fi
+
+#
+# Install start-stop script to $init_d (if it exists)
+#
+if [[ -d $init_d ]] ; then
+  printf "\nInstalling start-stop script to ${init_d}\n"
+  cd $current_dir
+  cp -f init.d/redis "${init_d}/"
+  result=$? ; if [[ "$result" -gt 0 ]] ; then
+    printf "\nERROR: could not copy start-stop-script to ${init_d}.\n"
+    exit 1
+  fi
+  printf "\nInstalling start-stop-script into system\n"
+  update-rc.d -f redis remove
+  update-rc.d redis defaults
+  result=$? ; if [[ "$result" -gt 0 ]] ; then
+    printf "\nERROR: could not install start-stop-script to system.\n"
+    exit 1
+  fi
 fi
 
 #
