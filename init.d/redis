@@ -53,7 +53,7 @@ redis_start() {
     echo "$pid" > $pidfile # Ensure pidfile exists with the pid.
   else
     echo -n "Starting Redis server...\n"
-    su redis -c "$redis $config"
+    su $user -c "$redis $config"
     exit 0
   fi
 }
