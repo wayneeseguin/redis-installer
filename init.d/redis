@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+### BEGIN INIT INFO
+# Provides:          redis-server
+# Required-Start:    $syslog
+# Required-Stop:     $syslog
+# Should-Start:      $local_fs
+# Should-Stop:       $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: redis-server - Persistent key-value db
+# Description:       redis-server - Persistent key-value db
+### END INIT INFO
 #
 # Author:  Wayne E. Seguin <wayneeseguin@gmail.com>
 # License: The same licence as Redis, New BSD
