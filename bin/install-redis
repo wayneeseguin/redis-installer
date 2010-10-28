@@ -93,13 +93,18 @@ if [[ "$result" -eq 0 ]] ; then
 
   # Directories that must exist.
   for directory in "${redis_path}" "${config_path}" "${log_path}" "${pid_path}" "${data_path}" "${bin_path}" "${source_path}" ; do
+
     mkdir -p "${directory}"
+
   done
 
   # Directories that $user must own.
   for directory in "${redis_path}" "${config_path}" "${log_path}" "${pid_path}" "${data_path}" ; do
+
     chown -R "${user}" "${directory}"
+
   done
+
 
 fi
 
@@ -110,20 +115,30 @@ cd $source_path
 # Fetch the Redis tarball
 #
 printf "\nDownloading  ${package}-${version}.${archive_format} ...\n"
+
 curl -O -L "http://redis.googlecode.com/files/${package}-${version}.${archive_format}"
+
 result=$? ; if [[ "$result" -gt 0 ]] ; then
+
   printf "\nERROR: ${package}-${version}.${archive_format} failed to download.\n"
+
   exit 1
+
 fi
 
 #
 # Extract the Redis tarball
 #
 printf "\nExtracting ${package} ${version} ...\n"
+
 tar zxf "${package}-${version}.${archive_format}"
+
 result=$? ; if [[ "$result" -gt 0 ]] ; then
+
   printf "\nERROR: ${package}-${version}.${archive_format} failed to extract.\n"
+
   exit 1
+
 fi
 
 # Switch into the extracted redis source directory.
@@ -133,47 +148,80 @@ cd "${package}-${version}"
 # Compile redis-server, redis-cli
 #
 printf "\nCompiling ${package} ${version} ...\n"
+
 make
+
 result=$? ; if [[ "$result" -gt 0 ]] ; then
+
   printf "\nERROR: ${package}-${version} failed to compile.\n"
+
   exit 1
+
 fi
 
 #
 # Install redis-server, redis-cli to $prefix
 #
 printf "\nInstalling ${package} ${version} ...\n"
+
 cp -f redis-server "${bin_path}/" && cp redis-cli "${bin_path}/"
+
 result=$? ; if [[ "$result" -gt 0 ]] ; then
+
   printf "\nERROR: ${package}-${version} failed to install.\n"
+
   exit 1
+
 fi
 
 #
 # Install start-stop script to $init_d (if it exists)
 #
 if [[ -d $init_d ]] ; then
+
   printf "\nInstalling start-stop script to ${init_d}\n"
+
   cd $current_dir
+
   cp -f $PWD/init.d/redis "${init_d}/"
+
   result=$? ; if [[ "$result" -gt 0 ]] ; then
+
     printf "\nERROR: could not copy start-stop-script to ${init_d}.\n"
+
     exit 1
+
   fi
+
   printf "\nInstalling start-stop-script into system\n"
-  update-rc.d -f redis remove
-  update-rc.d redis defaults
+
+  if command -v update-rc.d > /dev/null ; then
+
+    update-rc.d -f redis remove
+    update-rc.d redis defaults
+
+  elif command -v chkconfig > /dev/null
+
+    chkconfig redis on
+
+  fi
+
   result=$? ; if [[ "$result" -gt 0 ]] ; then
+
     printf "\nERROR: could not install start-stop-script to system.\n"
     exit 1
+
   fi
+
 fi
 
 #
 # Configure, if necessary.
 #
 if [[ ! -s "${config_path}/redis.conf" ]] ; then
+
   if [[ -s "${config_template}" ]] ; then
+
     # Filter sample config file into actual config file using defaults/settings.
     sed -e 's#/var/run#'"${pid_path}"'#g'  \
         -e 's#^daemonize .*$#daemonize '"${daemonize}"'#g'  \
@@ -189,7 +237,9 @@ if [[ ! -s "${config_path}/redis.conf" ]] ; then
         -e 's#^dir .*$#dir '"${data_path}/"'#g'\
         "${config_template}" \
       > "${config_path}/redis.conf"
+
   fi
+
 fi
 
 exit $result
