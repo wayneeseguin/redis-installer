@@ -200,7 +200,7 @@ if [[ -d $init_d ]] ; then
     update-rc.d -f redis remove
     update-rc.d redis defaults
 
-  elif command -v chkconfig > /dev/null
+  elif command -v chkconfig > /dev/null ; then
 
     chkconfig redis on
 
