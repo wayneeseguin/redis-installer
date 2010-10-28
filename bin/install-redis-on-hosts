@@ -32,7 +32,8 @@ for host in $hosts ; do
   ssh $host 'cd /usr/local/src/ ; chmod +x ./install-redis ; ./install-redis'
 
   printf "\nInstalling redis init script on ${host}.\n"
-  scp init.d/redis $host:redis_ctl
+  ssh $host 'curl http://github.com/wayneeseguin/redis-installer/raw/master/init.d/redis > /etc/init.d/redis ; chmod +x /etc/init.d/redis'
+
   ssh $host 'if [[ -d /etc/init.d ]] ; then mv redis_ctl /etc/init.d/redis && chmod +x /etc/init.d/redis ; else mv redis_ctl /etc/rc.d/redis && chmod +x /etc/rc.d/redis ; fi'
 done
 
