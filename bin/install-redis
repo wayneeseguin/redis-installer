@@ -155,7 +155,7 @@ fi
 if [[ -d $init_d ]] ; then
   printf "\nInstalling start-stop script to ${init_d}\n"
   cd $current_dir
-  cp -f init.d/redis "${init_d}/"
+  cp -f $PWD/init.d/redis "${init_d}/"
   result=$? ; if [[ "$result" -gt 0 ]] ; then
     printf "\nERROR: could not copy start-stop-script to ${init_d}.\n"
     exit 1
