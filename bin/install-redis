@@ -181,7 +181,7 @@ if [[ -d $init_d ]] ; then
 
   printf "\nInstalling start-stop script to ${init_d}\n"
 
-  cp -f ./init.d/redis "${init_d}/"
+  cp -f $source_path/${package}-${version}/init.d/redis "${init_d}/"
 
   result=$? ; if [[ "$result" -gt 0 ]] ; then
 
