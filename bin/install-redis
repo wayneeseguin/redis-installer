@@ -83,7 +83,7 @@ else
 fi
 
 config_template="${config_template:-"${source_path}/${package}-${version}/redis.conf"}"
-current_dir=`pwd`
+current_dir=$(pwd)
 
 #
 # Ensure that redis related directories exist.
@@ -181,9 +181,7 @@ if [[ -d $init_d ]] ; then
 
   printf "\nInstalling start-stop script to ${init_d}\n"
 
-  cd $current_dir
-
-  cp -f $source_path/init.d/redis "${init_d}/"
+  cp -f ./init.d/redis "${init_d}/"
 
   result=$? ; if [[ "$result" -gt 0 ]] ; then
 
