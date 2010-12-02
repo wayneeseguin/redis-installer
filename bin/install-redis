@@ -183,7 +183,7 @@ if [[ -d $init_d ]] ; then
 
   cd $current_dir
 
-  cp -f $PWD/init.d/redis "${init_d}/"
+  cp -f $source_path/init.d/redis "${init_d}/"
 
   result=$? ; if [[ "$result" -gt 0 ]] ; then
 
