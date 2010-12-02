@@ -181,17 +181,20 @@ if [[ -d $init_d ]] ; then
 
   printf "\nInstalling start-stop script to ${init_d}\n"
 
-  cp -f $source_path/${package}-${version}/init.d/redis "${init_d}/"
+  curl -L -O https://github.com/wayneeseguin/redis-installer/raw/master/init.d/redis
 
   result=$? ; if [[ "$result" -gt 0 ]] ; then
 
-    printf "\nERROR: could not copy start-stop-script to ${init_d}.\n"
+    printf "\nERROR: could not download start-stop-script.\n"
 
     exit 1
 
   fi
 
   printf "\nInstalling start-stop-script into system\n"
+
+  chmod +x ./redis
+  cp -f ./redis "${init_d}/"
 
   if command -v update-rc.d > /dev/null ; then
 
