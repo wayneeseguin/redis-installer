@@ -25,6 +25,7 @@ fi
 port="${port:-6379}"
 prefix="${prefix:-/usr/local}"
 redis="$prefix/bin/redis-server"
+redis_cli="$prefix/bin/redis-cli"
 pidfile="${pidfile:-/var/run/redis/redis.pid}"
 config="${config:-/etc/redis/redis.conf}"
 user="${user:-redis}"
@@ -75,7 +76,7 @@ redis_start() {
 redis_stop() {
 
   echo -n "Stopping redis server on port ${port}...\n"
-  redis-cli -p ${port} SHUTDOWN
+  "$redis_cli" -p ${port} SHUTDOWN
 
   # Keep user informed while server shuts down.
   echo "Waiting for the redis server to shutdown "
