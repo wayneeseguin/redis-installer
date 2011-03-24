@@ -1,6 +1,53 @@
 Author:  Wayne E. Seguin <wayneeseguin@gmail.com>
 License: See LICENSE file.
 
+### Redis Installer NEWS
+
+This has been superceeded by the BDSM redis extension which is far superior in
+both scope and functionality.
+
+Maintenance of this project has been discontinued in lieu of the BDSM
+extension.
+
+https://github.com/wayneeseguin/bdsm-extensions/
+https://github.com/wayneeseguin/bdsm-extensions/tree/master/redis
+
+I strongly advise that you switch to using the BDSM scripting framework for
+managing your Redis installation http://bdsm.beginrescueend.com/.
+
+### Installing BDSM
+
+To Install BDSM, as root do:
+
+  [[ ! -d /usr/local/src ]] && mkdir -p /usr/local/src
+  cd /usr/local/src
+  git clone git://github.com/wayneeseguin/bdsm
+  cd bdsm
+  ./install
+
+At some point, hopefully soon, this will be a standard download tarball, extract
+then install.
+
+### Installing Redis BDSM extension
+
+Note that a better BDSM workflow is forthcoming for extension management.
+Until then,
+
+    cd /usr/local/src
+    git clone git://github.com/wayneeseguin/bdsm-extensions
+    cd bdsm-extensions
+    ./extend redis
+
+At some point, hopefully very soon, this will become
+
+    bdsm extend redis
+
+If you do not have git you can install it quickly with another script as root do:
+
+    bash < <( curl http://rvm.beginrescueend.com/install/git )
+
+### Original README
+
 This redis-installer project bootstraps Redis in two scenarios.
 
 Scenario 1.
@@ -50,4 +97,5 @@ Any number of remote hosts (bin/install-redis-on-hosts)
   ∴ ./bin/install-redis-on-hosts root@host1 root@host2
 
 This will Install redis system wide on the remote hosts specified.
+
 
