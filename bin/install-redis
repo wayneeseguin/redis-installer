@@ -4,7 +4,7 @@
 # License: The same licence as Redis, New BSD
 #          http://www.opensource.org/licenses/bsd-license.php
 #
-default_redis_version=2.2.2
+default_redis_version=2.4.15
 
 # Emit usage information to the user.
 usage() {
